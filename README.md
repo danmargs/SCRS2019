@@ -4,7 +4,7 @@ progetto scrs 2019
 
 # Idea Progetto
 
-Il matrimonio prevede degli accordi che riguardano anche i rapporti patrimoniali tra i coniugi. Dal 1975, il regime patrimoniale stabilito dalla legge, durante la celebrazione del matrimonio, `e quello della comunione dei beni. L’idea di questo progetto `e quella di creare uno Smart Contract da eseguire sulla Blockchain, che sia in grado di gestire la comunione dei beni di due coniugi senza l’uso di un intermediario umano come un giudice o un avvocato.
+Il matrimonio prevede degli accordi che riguardano anche i rapporti patrimoniali tra i coniugi. Dal 1975, il regime patrimoniale stabilito dalla legge, durante la celebrazione del matrimonio, è quello della comunione dei beni. L’idea di questo progetto è quella di creare uno Smart Contract da eseguire sulla Blockchain, che sia in grado di gestire la comunione dei beni di due coniugi senza l’uso di un intermediario umano come un giudice o un avvocato.
 
 
 # Premesse per la creazione ed utilizzo dello Smart Contract
@@ -12,7 +12,7 @@ Il matrimonio prevede degli accordi che riguardano anche i rapporti patrimoniali
 La realizzazione dello smart contract di basa su queste premesse:
     Una coppia sposata con la comunione dei beni deve utilizzare un solo conto in comune;
     Se una persona chiede il divorzio non deve poter utilizzare (aggiungere o togliere) i soldi sul conto in comune, ma in quel caso può utilizzare il conto separato privato (vale anche per il coniuge che magari non vuole ancora divorziare).
-    Se tutti e due chiedono il divorzio allora i beni presenti nel conto in comune dovranno essere divisi a met`a in ogni 
+    Se tutti e due chiedono il divorzio allora i beni presenti nel conto in comune dovranno essere divisi a metà in ogni 
     caso.
 
 
