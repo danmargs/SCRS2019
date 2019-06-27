@@ -10,9 +10,10 @@ Il matrimonio prevede degli accordi che riguardano anche i rapporti patrimoniali
 # Premesse per la creazione ed utilizzo dello Smart Contract
 
 La realizzazione dello smart contract di basa su queste premesse:
-    Una coppia sposata con la comunione dei beni deve utilizzare un solo conto in comune;
-    Se una persona chiede il divorzio non deve poter utilizzare (aggiungere o togliere) i soldi sul conto in comune, ma in quel caso può utilizzare il conto separato privato (vale anche per il coniuge che magari non vuole ancora divorziare).
-    Se tutti e due chiedono il divorzio allora i beni presenti nel conto in comune dovranno essere divisi a metà in ogni 
+
+ * Una coppia sposata con la comunione dei beni deve utilizzare un solo conto in comune;
+ * Se una persona chiede il divorzio non deve poter utilizzare (aggiungere o togliere) i soldi sul conto in comune, ma in quel caso può utilizzare il conto separato privato (vale anche per il coniuge che magari non vuole ancora divorziare).
+ * Se tutti e due chiedono il divorzio allora i beni presenti nel conto in comune dovranno essere divisi a metà in ogni 
     caso.
 
 
