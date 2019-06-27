@@ -1,0 +1,1 @@
+$ docker swarm join-token SWMTKN-1-3as8cvf3yxk8e7zj98954jhjza3w75mngmxh543llgpo0c8k7z-61zyibtaqjffeess<IP-PC1:PORTA>

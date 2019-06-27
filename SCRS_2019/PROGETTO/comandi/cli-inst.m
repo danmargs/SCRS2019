@@ -1,0 +1,1 @@
+$ peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n mycc -v 1.0 -c '{"Args":["init","renzo","sposato","lucia","sposata","100"]}' -P "OR ('Org1MSP.member','Org2MSP.member')"

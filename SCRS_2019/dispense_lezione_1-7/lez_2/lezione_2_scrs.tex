@@ -1,0 +1,197 @@
+\documentclass[10pt,a4paper,italian]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[italian]{babel}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{latexsym}
+\usepackage{amsthm} 
+\usepackage{eucal} 
+\usepackage{tabularx}
+\usepackage{subfig}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tikz}
+\usepackage{listings}
+\newcommand{\TV}{{Università degli Studi di Roma \emph{Tor Vergata}}}
+\lstset{basicstyle=\small}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+\lstset{style=mystyle}
+
+
+\makeatletter
+\def\namedlabel#1#2{\begingroup
+    #2%
+    \def\@currentlabel{#2}%
+    \phantomsection\label{#1}\endgroup
+}
+\makeatother
+
+\begin{document}
+\makeatletter
+\let\@orig@endthebibliography\endthebibliography
+\renewcommand\endthebibliography{
+  \xdef\@kept@last@number{\the\c@enumiv}
+  \@orig@endthebibliography}
+
+\newenvironment{thesitography}[1]
+  {\def\bibname{Fonti virtuali}
+   \thebibliography{#1}
+   \setcounter{enumiv}{\@kept@last@number}
+}
+  {\@orig@endthebibliography}
+\makeatother
+
+\title{\begin{center}\textbf{Sistemi Cooperativi e Reti Sociali}\newline
+\vspace{0.3cm}\\
+Lezione 2
+\end{center}}
+\author{Daniele Margiotta, Gabriele Prestifilippo, Luca Squadrone}
+\date{19 marzo 2019}
+\maketitle
+
+\clearpage
+\tableofcontents
+\newpage
+
+\chapter{Introduzione}
+\noindent Proseguendo quanto detto nel C10K problem, la soluzione migliore possibile per il C10K problem sarebbe avere un singolo processo, e fare in modo che tutte le richieste vengano svolte nel minor tempo possibile. L'obiettivo di questa dispensa è analizzare una particolare soluzione che utilizza le \textbf{fibers} in go\\
+
+\noindent Per realizzare ciò quando si hanno un numero elevato di richieste per un server, definendo come $\textbf{T}_\textbf{c}$ è il tempo di gestire la comunicazione e $\textbf{T}_\textbf{e}$ è il tempo di elaborazione della transazione allora, sapendo che possono arrivare al più un numero di connessioni pari alla \textbf{velocità di rete ($V_r$)}, è necessario che:
+
+\begin{equation}
+T_c + T_e \leqslant V_r
+\end{equation}
+
+\noindent Sapendo che $T_c$ non può essere minore della $V_r$, possiamo idealmente pensare che $T_e=0$, quindi bisogna che un server elabori tante connessioni al secondo quanto la velocità di rete.\\
+
+\noindent Per fare un esempio, se la scheda di rete del server va a 1Gb/s e arrivano richieste di 100Kb/s allora sarà necessario gestire con 1 solo processo 10mila connessioni (socket) al secondo.\\
+
+\noindent Quindi in altre parole è necessario passare da un modo di gestione sincrono e sequenziale delle connessioni, ad un mondo asincrono a flusso frammentato.
+
+\chapter{Tipi di comunicazione}
+\noindent In questo capitolo analizzeremo i vari tipi di comunicazione e vedremo alcuni esempi necessari per introdurre i concetti delle fibers e il loro utilizzo.
+
+\section{Comunicazione sincrone}
+\noindent La comunicazione sincrona è un tipo di comunicazione in cui il mittente invia il messaggio e rimane in attesa sin quando il ricevente non invia la risposta al mittente, anche se la risposta è solo acknoledgment.
+\\
+Un esempio di comunicazione sincrona può essere il seguente:
+
+\lstinputlisting[language=Octave]{./sincrona.m}
+
+\noindent Questo tipo di connessioni non sono per nulla veloci, infatti l'attesa della risposta solitamente è un tempo non ignorabile, al punto che in una connessione di rete su internet è necessario introdurre un timeout dopo il quale la connessione viene rifiutata. Inoltre in questo tipo di comunicazione le chiamate di invio e ricezione sono bloccanti per l'esecuzione del programma. Per migliorare la situazione si passa ad un tipo di comunicazione asincrono.
+
+\section{Comunicazione asincrone}
+\noindent La comunicazione asincrona è un tipo comunicazione in cui il mittente invia il messaggio e poi continua la propria esecuzione. l'asincronicità di questo tipo di comunicazione tra l'invio di un messaggio e la risposta al messaggio stesso permette di gestire più connessioni in un lasso di tempo, poichè non è necessario mantenere connessioni attive in attesa.\\
+
+\noindent Un esempio di comunicazione asincrona può essere il seguente:
+
+\lstinputlisting[language=Octave]{./asincrona.m}
+
+\noindent Il processo P1 invia sul canale C il valore della variabile n ed il processo P2 riceve sul canale C il valore della variabile n e la mette nella variabile m. Entrambi possono eseguire altre operazioni una volta inviata o ricevuta l'informazione, ma mentre la chiamata di invio di informazioni non è bloccante, la chiamata di ricezione può essere ancora bloccante, a seconda di come il programma è gestito.
+
+
+\subsection{Programmazione asincrona e callbacks}
+
+\noindent Un esempio di linguaggio in cui sono presenti le callbacks e siamo forzati ad utilizzare un singolo thread è il javascript, dove esiste anche la possibilità di eseguire le istruzione in modalità asincrona.\\
+
+\noindent Consideriamo lo scenario in cui dobbiamo effettuare una richiesta ad un server.In modalità sincrona avremmo ad esempio:
+
+\lstinputlisting[language=Octave]{./serv1.m}
+
+\noindent Se il server impiega 10 secondi a rispondere, il nostro codice è bloccato alla seconda istruzione, non si possono eseguire altre istruzioni nel frattempo. Sfruttando invece le closures è possibile riscrivere il codice in questo modo, realizzando quella si definisce una \textbf{asynchronous callback}:
+
+\lstinputlisting[language=Octave]{./serv2.m}
+
+\noindent In questo caso, la seconda istruzione è asincrona e non bloccante, dopo la sua esecuzione il nostro programma continua con l'istruzione successiva: quando il server risponderà, verrà eseguita la funzione di callback passata come argomento alla funzione asincrona.\\
+
+\noindent Tecnicamente, il supporto alla programmazione asincrona è implementato, nell'interprete javascript, tramite l'utilizzo di:
+
+\begin{enumerate}
+	\item una coda di messaggi:
+	\item un ciclo principale di gestione eventi.
+\end{enumerate}
+
+\noindent Tutte le istruzioni che devono essere eseguite dal programma vengono inserite in una coda di messaggi che viene gestita da un ciclo principale che svuota ed esegue in un unico thread le istruzioni presenti nella coda.\\
+
+\noindent Nel caso di una funzionalità asincrona, dipendente da un evento esterno al programma, un componente del runtime di javascript aggiunge alla coda dei messaggi la funzione di callback da eseguire, con i relativi parametri, non appena l'evento si è verificato.\\
+
+\noindent Le funzioni di callback non sono mai interrompibili, così come qualsiasi funzione in javascript: in questo modo non esisterà mai un problema di accesso ad aree di memorie condivise da thread diversi, visto che il ciclo principale viene eseguito in un unico thread.\\
+
+\noindent Il linguaggio di programmazione Go(o golang) è strutturato a grandi linee stesso modo di Javascript per quanto riguarda la gestione delle callback.
+
+\section{Continuation call}
+Una \textit{Continuation call} è un modo per rappresentare lo stato di esecuzione di un programma ad un preciso istante e punto. Molti linguaggi hanno un costrutto che permette di salvare lo stato corrente di esecuzione per poi riprendere l'esecuzione a partire da questo stato in un momento successivo. Questa tecnica è tipica della programmazione funzionale ma sono molti i linguaggi di programmazione che presentano questa caratteristica con varie denominazioni come per esempio:
+\begin{itemize}
+	\item Lisp: call/cc;
+	\item C: setcontext.
+\end{itemize}
+La Continuation call si utilizza per "saltare" da una parte all'altra del programma  a seconda delle necessità. Funziona in modo analogo al comando goto presente nel BASIC con la differenza che il comando goto è sconsigliato perché rende la manutenzione del codice difficile mentre la continuazione non rende ardua la modifica del codice quando questo diventa di elevate dimensioni. La continuazione non salta tra linee di codice ma tra stati. Si può vedere il programma come un insieme di stati che evolvono a seconda delle azioni dell'utente e la continuazione consente di saltare tra stati diversi a seconda delle necessità.
+Se le continuation call può essere usata solo per uscire dal contesto corrente, si dice il linguaggio supporta l'\textit{escape continuation}. Molti linguaggi che non supportanto direttamente la continuazione, hanno il supporto per la gestione delle eccezioni, che è equivalente all'escape continuation e può essere usata per gli stessi scopi. I costrutti C setjmp e longjmp sono di questo tipo: possono essere usati solo per srotolare lo stack e non per ripristinare una precedente continuazione salvata.
+
+\section{Modello Produttore/Consumatore}
+\noindent Abbiamo visto che i processi possono comunicare scambiando messaggi. Il modello a scambio di messaggi si presta, di fatto, ad applicazioni strutturate come il produttore/consumatore: un processo produce dati e l’altro li utilizza.
+\newline \noindent Nel modello a scambio di messaggi lo schema produttore/consumatore si realizza immediatamente come segue:
+\lstinputlisting[language=Octave]{./prod_cons_1.m}
+\noindent Se utilizziamo una send asincrona (bloccante quando il buffer è pieno) e una receive sincrona, otteniamo una soluzione soddisfacente: il consumatore attende se non ci sono dati da consumare, il produttore attende se non c’è spazio nel buffer.
+
+\chapter{Meccanismi di comunicazione e gestione thread avanzata go}
+\noindent In questo capitolo parleremo di una modalità di comunicazione che Go implementa, i \textbf{canali}, e di un importante miglioramento riguardo la gestione dei thread con l'utilizzo delle \textbf{fibers} (o thread leggeri).
+
+\section{Goroutines}
+\noindent Poiche dalla stessa documentazione del linguaggio Go il concetto di canale è strettamente legato al concetto di goroutine, definiamo brevemente cosa effettivamente sia una \textbf{goroutine}.\\
+
+\noindent Una goroutine è un thread ``leggero'', ed è un costrutto dell'ambiente del linguaggio Go. Le goroutine operano in \textbf{multitasking cooperativo}, ovvero i thread non sono mai costrette a interrompere la loro esecuzione (come succede nel preemptive multitasking, ovvero il metodo di gestione classico dei thread) ma spontaneamente rilasciano la CPU se essi sono in attesa o in deadlock, permettendo a tutti gli altri processi di continuare la loro esecuzione. Perchè questo tipo di scheduling funzioni è necessario che tutti i processi cooperino, e nel caso delle goroutines la cooperazione è assicurata dall'ambiente del linguaggio Go(e non può essere specificato dal programmatore). In questo tipo di gestione dei thread lo scheduler si limita a assegnare la CPU ad un nuovo processo ogni volta che il processo stesso rilascia la CPU. \\
+
+\noindent In linguaggio Go, una volta definita una funzione $f(arg1,arg2)$, è possibile chiamare una goroutine che esegue quella funzione come:
+
+\lstinputlisting[language=Octave]{./goroutine.m}
+
+\section{Canali Go}
+\noindent I canali Go sono dei pipe che consentono alle gorutines di inviare messaggi su di essi, di leggere i messaggi in essi contenuti e consumarli, o sincronizzazione di due goroutines\\
+
+\noindent Normalmente i \textit{Channel Go} sono privi di buffer, ovvero accettano nuovi messaggi solo se c'è un processo pronto a riceverli, tuttavia è possibile specificare la grandezza del buffer durante la creazione del channel.\\
+
+\noindent Supponiamo di voler creare un channel contenente stringhe, il codice in linguaggio go è il seguente:
+
+\lstinputlisting[language=Octave]{./go_channel.m}
+
+\section{Fibers}
+\noindent Una \textbf{fibers} è un thread \textit{``leggero''}, come le goroutines, e anche esse operano in multitasking cooperativo. Tuttavia le fibers non sono implementate in maniera nativa in go.\\
+
+\noindent Mentre le goroutines lavorano a livello logico come costrutti associati all'enviroment go, le fibers sono viste come costrutti associato al sistema operativo e la cooperazione non è assicurata dall'ambiente del linguaggio go, tuttavia delle regole di cooperazione possono essere specificate dal programmatore.\\
+
+\noindent Poichè in letteratura le fibers sono sempre associate alle cooroutines per completezza si fornisce anche anche una breve digressione su di esse. Una cooroutine in letteratura è descritta con gli stessi concetti di una fibers e la distinzione, se effettivamente esiste, è che le cooroutines sono costrutti a livello del linguaggio utilizzato, mentre le fibers sono costrutti a livello del sistema operativo, che possono essere visti come thread che non operano in parallelo. Come è evidente la letteratura non è ben chiara sull'argomento, al punto tale che alcune fonti citano le fibers come un implementazione delle cooroutines, altre come un substrato sulle quali sono implementate le cooroutines.
+
+
+
+\end{document}

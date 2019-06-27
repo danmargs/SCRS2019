@@ -1,0 +1,1 @@
+channel_name := make(chan string, 2)
